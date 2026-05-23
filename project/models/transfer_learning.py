@@ -1,12 +1,6 @@
-"""
-transfer_learning.py
-ResNet50 pretrained untuk klasifikasi pneumonia.
-"""
-
 import torch
 import torch.nn as nn
 import torchvision.models as models
-
 
 class ResNet50TransferLearning(nn.Module):
     def __init__(self, num_classes=2):
@@ -15,7 +9,7 @@ class ResNet50TransferLearning(nn.Module):
         # Load pretrained ResNet50 dari ImageNet
         self.model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1)
         
-        # Freeze semua layer backbone (tidak akan dilatih di awal)
+        # Freeze seluruh parameter backbone bawaan
         for param in self.model.parameters():
             param.requires_grad = False
         
@@ -28,10 +22,6 @@ class ResNet50TransferLearning(nn.Module):
             nn.Dropout(0.2),
             nn.Linear(512, num_classes)
         )
-        
-        # Classifier head boleh dilatih
-        for param in self.model.fc.parameters():
-            param.requires_grad = True
     
     def unfreeze_layer4(self):
         """Membuka layer4 agar bisa di-fine-tune"""

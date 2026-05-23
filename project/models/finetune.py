@@ -1,8 +1,3 @@
-"""
-finetune.py
-Training loop untuk fine-tuning.
-"""
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -10,7 +5,6 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from copy import deepcopy
-
 
 class FineTuner:
     def __init__(self, model, train_loader, val_loader, class_weights=None):

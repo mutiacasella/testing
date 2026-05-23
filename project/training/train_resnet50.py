@@ -1,8 +1,3 @@
-"""
-train_resnet50.py
-Script utama untuk menjalankan transfer learning ResNet50.
-"""
-
 import sys
 import os
 import torch
@@ -15,7 +10,7 @@ from tqdm import tqdm
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# Import dari dataloader (pastikan sudah dijalankan)
+# Import dari dataloader
 try:
     from preprocessing.dataloader import train_loader, val_loader, test_loader, train_df
     print("DataLoaders loaded successfully")
@@ -26,23 +21,18 @@ except ImportError:
 from models.transfer_learning import ResNet50TransferLearning
 from models.finetune import FineTuner
 
-
 def get_class_weights(train_df):
     """Hitung class weights untuk mengatasi imbalance dataset"""
     labels = train_df['label'].values
     class_weights = compute_class_weight('balanced', classes=np.array([0, 1]), y=labels)
     return torch.tensor(class_weights, dtype=torch.float)
 
-
 def evaluate_on_test(model, test_loader):
     """
     Evaluasi model di test set.
-    Parameter model: model yang sudah dilatih (sudah dalam state terbaik)
+    Parameter model: model yang sudah dilatih (state terbaik)
     """
-    # Tentukan device secara eksplisit (lebih aman)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
-    # Pastikan model di device yang sama
     model = model.to(device)
     model.eval()
     
@@ -80,7 +70,6 @@ def evaluate_on_test(model, test_loader):
     
     return all_preds, all_labels
 
-
 def experiment_frozen():
     """Eksperimen 1: Hanya classifier head yang dilatih"""
     print("\n" + "="*60)
@@ -102,11 +91,10 @@ def experiment_frozen():
     
     return finetuner
 
-
 def experiment_unfreeze_layer4():
-    """Eksperimen 2: Classifier head lalu unfreeze layer4 (DIREKOMENDASIKAN)"""
+    """Eksperimen 2: Classifier head lalu unfreeze layer4"""
     print("\n" + "="*60)
-    print("EXPERIMENT 2: UNFREEZE LAYER4 (RECOMMENDED)")
+    print("EXPERIMENT 2: UNFREEZE LAYER4")
     print("="*60)
     
     model = ResNet50TransferLearning(num_classes=2)
@@ -123,7 +111,7 @@ def experiment_unfreeze_layer4():
     finetuner_stage2 = FineTuner(model, train_loader, val_loader, weights)
     finetuner_stage2.fit(epochs=7, learning_rate=0.0001, weight_decay=1e-4)
     
-    # Gabungkan history dari kedua phase
+    # History dari kedua phase
     finetuner_stage2.history = {
         'train_loss': finetuner_stage1.history['train_loss'] + finetuner_stage2.history['train_loss'],
         'train_acc': finetuner_stage1.history['train_acc'] + finetuner_stage2.history['train_acc'],
@@ -141,23 +129,3 @@ def experiment_unfreeze_layer4():
     evaluate_on_test(trained_model, test_loader)
     
     return finetuner_stage2
-
-
-# ========== MAIN ==========
-if __name__ == "__main__":
-    print("\n" + "="*60)
-    print("RESNET50 TRANSFER LEARNING FOR PNEUMONIA DETECTION")
-    print("="*60)
-    
-    print("\nPilih eksperimen:")
-    print("1. Frozen backbone (transfer learning dasar)")
-    print("2. Unfreeze layer4 (direkomendasikan - hasil terbaik)")
-    
-    choice = input("\nPilihan (1/2): ").strip()
-    
-    if choice == '1':
-        experiment_frozen()
-    else:
-        experiment_unfreeze_layer4()
-    
-    print("\nAll done!")
