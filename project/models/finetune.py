@@ -47,7 +47,7 @@ class FineTuner:
             running_corrects += torch.sum(preds == labels.data)
         
         epoch_loss = running_loss / len(self.train_loader.dataset)
-        epoch_acc = running_corrects.double() / len(self.train_loader.dataset).cpu().item()
+        epoch_acc = (running_corrects.double() / len(self.train_loader.dataset)).cpu().item()
         return epoch_loss, epoch_acc
     
     def _validate(self, criterion):
@@ -66,7 +66,7 @@ class FineTuner:
                 val_corrects += torch.sum(preds == labels.data)
         
         epoch_loss = val_loss / len(self.val_loader.dataset)
-        epoch_acc = val_corrects.double() / len(self.val_loader.dataset).cpu().item()
+        epoch_acc = (val_corrects.double() / len(self.val_loader.dataset)).cpu().item()
         return epoch_loss, epoch_acc
     
     def fit(self, epochs, learning_rate=0.001, weight_decay=1e-4):
