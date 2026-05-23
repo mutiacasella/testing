@@ -71,7 +71,7 @@ class FineTuner:
     
     def fit(self, epochs, learning_rate=0.001, weight_decay=1e-4):
         optimizer = optim.Adam(self.model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-        scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=3, verbose=True)
+        scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=3)
         
         if self.class_weights is not None:
             criterion = nn.CrossEntropyLoss(weight=self.class_weights.to(self.device))
